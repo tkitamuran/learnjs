@@ -7,8 +7,8 @@ learnjs.problems = [
       code: "function problem() { return __; }"
   },
   {
-    description: "Simple Math",
-    code: "function problem() { return 42 === 6 * __; }"
+      description: "Simple Math",
+      code: "function problem() { return 42 === 6 * __; }"
   }
 ];
 
