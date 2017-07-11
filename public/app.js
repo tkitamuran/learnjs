@@ -26,7 +26,8 @@ learnjs.problemView = function(data) {
 
   function checkAnswerClick() {
     if ( checkAnswer() ) {
-      learnjs.flashElement(resultFlash, 'Correct!');
+      var correctFlash = learnjs.buildCorrectFlash(problemNumber);
+      learnjs.flashElement(resultFlash, correctFlash);
     } else {
       learnjs.flashElement(resultFlash, 'Incorrect!');
     }
@@ -36,16 +37,29 @@ learnjs.problemView = function(data) {
   view.find('.check-btn').click(checkAnswerClick);
   view.find('.title').text('Problem #' + problemNumber);
   learnjs.applyObject(problemData, view);
+
+  if ( problemNumber < learnjs.problems.length ) {
+    var buttonItem = learnjs.template('skip-btn');
+    buttonItem.find('a').attr('href', '#problem-' + (problemNumber + 1));
+    $('.nav-list').append(buttonItem);
+    view.bind('removingView', function() {
+      buttonItem.remove();
+    });
+  }
+
   return view;
 };
 
 learnjs.showView = function(hash) {
   var routes = {
-    '#problem' : learnjs.problemView
+    '#problem' : learnjs.problemView,
+    '#' : learnjs.landingView,
+    '' : learnjs.landingView
   };
   var hashParts = hash.split('-');
   var viewFn = routes[hashParts[0]];
   if (viewFn) {
+    learnjs.triggerEvent('removingView', []);
     $('.view-container').empty().append(viewFn(hashParts[1]));
   }
 };
@@ -68,4 +82,28 @@ learnjs.flashElement = function(elem, content) {
     elem.html(content);
     elem.fadeIn();
   });
+};
+
+learnjs.template = function(name) {
+  return $('.templates .' + name).clone();
+};
+
+learnjs.buildCorrectFlash = function(problemNum) {
+  var correctFlash = learnjs.template('correct-flash');
+  var link = correctFlash.find('a');
+  if ( problemNum < learnjs.problems.length ) {
+    link.attr('href', '#problem-' + (problemNum + 1));
+  } else {
+    link.attr('href', '');
+    link.text("You're Finished!");
+  }
+  return correctFlash;
+};
+
+learnjs.landingView = function() {
+  return learnjs.template('landing-view');
+};
+
+learnjs.triggerEvent = function(name, args) {
+  $('.view-container>*').trigger(name, args);
 };
